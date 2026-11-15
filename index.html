@@ -190,6 +190,7 @@ ol.hint{padding-left:20px;margin:0;display:grid;gap:4px}
   <button class="btn" id="mxi" type="button">Importer un fichier Excel</button>
   <button class="btn" id="mchg" type="button">Changer le code</button>
   <button class="btn" id="mlock" type="button">Verrouiller</button>
+  <button class="btn danger" id="mdel" type="button">Supprimer mon compte</button>
   <button class="btn" id="mclose" type="button">Fermer</button>
   <input type="file" id="xfile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 </div></dialog>
@@ -199,6 +200,13 @@ ol.hint{padding-left:20px;margin:0;display:grid;gap:4px}
   <p class="hint">Enregistre le fichier de ton compte « <b id="dacctname"></b> » : il contient tes données, chiffrées avec ton code. Envoie-le vers Google Drive pour le retrouver sur un autre appareil (écran de connexion → Changer de compte → Importer un compte).</p>
   <button class="btn primary" id="dsend" type="button">Enregistrer / envoyer vers Drive</button>
   <button class="btn" id="dlater" type="button">Plus tard</button>
+</div></dialog>
+
+<dialog id="ddel"><div class="box">
+  <h2>Supprimer ce compte ?</h2>
+  <p class="hint">Le compte « <b id="dname"></b> » et toutes ses données seront effacés de cet appareil, définitivement. Les fichiers Excel déjà envoyés vers Drive ou téléchargés ne sont pas supprimés : ils permettent de le restaurer.</p>
+  <button class="btn danger" id="dconfirm" type="button">Supprimer définitivement</button>
+  <button class="btn" id="dcancel" type="button">Annuler</button>
 </div></dialog>
 
 <dialog id="dinfo"><div class="box">
@@ -1055,6 +1063,19 @@ async function sendAccountFile(){
   document.querySelectorAll('dialog[open]').forEach(x=>x.close());$('#dinfo').showModal();
 }
 $('#mshare').addEventListener('click',sendAccountFile);
+$('#mdel').addEventListener('click',()=>{$('#dmenu').close();$('#dname').textContent=acct?acct.name:'';$('#ddel').showModal()});
+$('#dcancel').addEventListener('click',()=>$('#ddel').close());
+$('#dconfirm').addEventListener('click',async()=>{
+  $('#ddel').close();
+  const pin=await askPin('Entre ton code pour confirmer',false);
+  if(!pin)return;
+  if(pin!==curPin){toast('Code incorrect : compte conservé');return}
+  const a=acct;
+  localStorage.removeItem(a.k);localStorage.removeItem('passe.fail.'+a.id);
+  accts=accts.filter(x=>x.id!==a.id);saveAccts();
+  if(localStorage.getItem(LLAST)===a.id)localStorage.removeItem(LLAST);
+  showLock();toast('Compte « '+a.name+' » supprimé');
+});
 $('#dsend').addEventListener('click',sendAccountFile);
 $('#dlater').addEventListener('click',()=>$('#dacct').close());
 
