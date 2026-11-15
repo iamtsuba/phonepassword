@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: https:; connect-src https://www.wikidata.org; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#4f46e5">
+<title>PhonePassword</title>
+<link id="fav" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%234f46e5%22%2F%3E%3Cpath%20d%3D%22M32%208V52M13%2041L51%2019M13%2019L51%2041%22%20stroke%3D%22%23fff%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M27.5%2033v-5a4.5%204.5%200%200%201%209%200v5%22%20fill%3D%22none%22%20stroke%3D%22%23fbbf24%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Crect%20x%3D%2223%22%20y%3D%2232%22%20width%3D%2218%22%20height%3D%2215%22%20rx%3D%223%22%20fill%3D%22%23fbbf24%22%20stroke%3D%22%234f46e5%22%20stroke-width%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2238.2%22%20r%3D%222.1%22%20fill%3D%22%234f46e5%22%2F%3E%3Crect%20x%3D%2231.2%22%20y%3D%2238.8%22%20width%3D%221.6%22%20height%3D%224%22%20rx%3D%22.8%22%20fill%3D%22%234f46e5%22%2F%3E%3C%2Fsvg%3E">
+<link id="touch" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%234f46e5%22%2F%3E%3Cpath%20d%3D%22M32%208V52M13%2041L51%2019M13%2019L51%2041%22%20stroke%3D%22%23fff%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M27.5%2033v-5a4.5%204.5%200%200%201%209%200v5%22%20fill%3D%22none%22%20stroke%3D%22%23fbbf24%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Crect%20x%3D%2223%22%20y%3D%2232%22%20width%3D%2218%22%20height%3D%2215%22%20rx%3D%223%22%20fill%3D%22%23fbbf24%22%20stroke%3D%22%234f46e5%22%20stroke-width%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2238.2%22%20r%3D%222.1%22%20fill%3D%22%234f46e5%22%2F%3E%3Crect%20x%3D%2231.2%22%20y%3D%2238.8%22%20width%3D%221.6%22%20height%3D%224%22%20rx%3D%22.8%22%20fill%3D%22%234f46e5%22%2F%3E%3C%2Fsvg%3E">
+<style>
+:root{--bg:#f4f5fa;--card:#fff;--tx:#1b1d2a;--mut:#6b7080;--ac:#4f46e5;--acx:#fff;--bd:#e1e3ee;--err:#d93a3a;--in:#f4f5fa}
+@media(prefers-color-scheme:dark){:root{--bg:#0f111a;--card:#1a1d2b;--tx:#eceef7;--mut:#9aa0b4;--bd:#2a2e42;--ac:#7c75ff;--acx:#0f111a;--in:#12141f}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;width:100%;outline:none}
+input:focus{border-color:var(--ac)}
+h1,h2{margin:0}
+.btn{border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:12px 16px;font-weight:600}
+.btn.primary{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.btn.danger{color:var(--err)}
+.btn:disabled{opacity:.6}
+.err{color:var(--err);font-size:14px;min-height:20px}
+/* verrouillage */
+#lock{min-height:100vh;display:grid;place-items:center;padding:24px}
+.lockbox{width:min(100%,360px);text-align:center;display:grid;gap:14px}
+.lockbox img{width:88px;height:88px;margin:0 auto;border-radius:22px}
+.lockbox p{margin:0;color:var(--mut);font-size:14px}
+.lockbox form{display:grid;gap:10px;text-align:left}
+/* app */
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 16px 8px}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px}
+.brand img{width:30px;height:30px;border-radius:8px}
+.hbtns{display:flex;gap:6px}
+.hb{width:42px;height:42px;border-radius:12px;border:1px solid var(--bd);background:var(--card);font-size:18px}
+.search{padding:0 16px 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:18px 6px;padding:12px 12px 120px}
+.app{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;padding:0;min-width:0}
+.app span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:center;max-width:84px;word-break:break-word}
+.tile{position:relative;width:62px;height:62px;border-radius:16px;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:700;font-size:26px;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10px;background:#fff;opacity:0}
+.tile img.big{padding:0;object-fit:cover}
+.tile img.small{inset:0;margin:auto;width:34px;height:34px;padding:0;background:transparent}
+.tile.hasimg{background:#fff!important}
+.tile.hasimg img{opacity:1}
+.tile.hasimg .ltr{display:none}
+.empty{text-align:center;color:var(--mut);padding:40px 24px}
+#fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:0;background:var(--ac);color:var(--acx);font-size:32px;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+/* dialogues */
+dialog{overflow:auto;border:0;border-radius:20px;padding:0;width:min(92vw,420px);background:var(--card);color:var(--tx);box-shadow:0 10px 40px rgba(0,0,0,.35);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.box{padding:20px;display:grid;gap:14px}
+.vhead{display:flex;align-items:center;gap:14px}
+.vhead h2{font-size:20px;word-break:break-word}
+.vrow .lab{font-size:12px;color:var(--mut);margin-bottom:4px}
+.vrow .line{display:flex;align-items:center;gap:8px;background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 12px}
+.val{flex:1;min-width:0;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px}
+.rb{display:flex;gap:6px;flex:none}
+.sb{border:1px solid var(--bd);background:var(--card);border-radius:9px;padding:8px 11px;font-size:13px;font-weight:600}
+.sb.main{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.actions{display:flex;gap:8px}
+.actions .btn{flex:1}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:5px}
+.field{display:block}
+.pwrow{display:flex;gap:6px}
+.pwrow input{flex:1;min-width:0}
+.fhead{display:flex;align-items:center;gap:14px}
+.fhead .info{flex:1;min-width:0}
+.fhead .info small{display:block;color:var(--mut);font-size:12px;min-height:16px;word-break:break-all}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border:1px solid var(--bd);background:var(--in);border-radius:999px;padding:5px 11px;font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu{display:grid;gap:8px}
+.menu .btn{text-align:left}
+ol.hint{padding-left:20px;margin:0;display:grid;gap:4px}
+.prevbtn{position:relative;background:none;border:0;padding:0;flex:none}
+.pedit{position:absolute;right:-5px;bottom:-5px;width:22px;height:22px;border-radius:50%;background:var(--ac);color:var(--acx);font-size:12px;display:grid;place-items:center;border:2px solid var(--card)}
+.hint{margin:0;color:var(--mut);font-size:13px}
+.lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.lopt{background:var(--in);border:2px solid var(--bd);border-radius:14px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.lopt.sel{border-color:var(--ac)}
+.lbox{width:68px;height:68px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden}
+.lbox img{width:100%;height:100%;object-fit:contain;padding:4px}
+.lcap{font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lwarn{font-size:10px;color:var(--err)}
+.dots{display:flex;gap:14px;justify-content:center;margin:4px 0 2px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--mut)}
+.dots i.on{background:var(--ac);border-color:var(--ac)}
+.perr{text-align:center}
+.pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px;justify-content:center;margin:6px auto}
+.key{width:76px;height:76px;border-radius:50%;border:1px solid var(--bd);background:var(--card);font-size:28px;font-weight:600;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.key:active{background:var(--ac);color:var(--acx)}
+.key.fn{font-size:22px;color:var(--mut)}
+#padhost{display:grid;gap:6px}
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#22242f;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:99999;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="lockbox">
+    <img id="biglogo" alt="PhonePassword">
+    <h1>PhonePassword</h1>
+    <p id="lockmsg"></p>
+    <div id="padhost"></div>
+    <form id="legacy" autocomplete="off" hidden>
+      <input type="password" id="mp1" placeholder="Ancien mot de passe maître" autocomplete="off">
+      <button class="btn primary" id="lockbtn" type="submit">Ouvrir l'ancien coffre</button>
+      <div class="err" id="lockerr"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="brand"><img id="hlogo" alt=""><b>PhonePassword</b></div>
+    <div class="hbtns">
+      <button class="hb" id="bmenu" type="button" aria-label="Menu">⋯</button>
+      <button class="hb" id="block" type="button" aria-label="Verrouiller">🔒</button>
+    </div>
+  </header>
+  <div class="search"><input id="q" type="search" placeholder="Rechercher…" autocomplete="off"></div>
+  <main>
+    <div id="grid" class="grid"></div>
+    <p id="empty" class="empty" hidden>Aucun compte pour l'instant.<br>Appuie sur + pour en ajouter un.</p>
+  </main>
+  <button id="fab" type="button" aria-label="Ajouter">+</button>
+</div>
+
+<dialog id="dview"><div class="box">
+  <div class="vhead" id="vhead"></div>
+  <div id="vrows" style="display:grid;gap:12px"></div>
+  <div class="actions">
+    <button class="btn" id="vedit" type="button">Modifier</button>
+    <button class="btn danger" id="vdel" type="button">Supprimer</button>
+  </div>
+  <button class="btn" id="vclose" type="button">Fermer</button>
+</div></dialog>
+
+<dialog id="dform"><form class="box" id="fform" autocomplete="off">
+  <h2 id="ftitle">Nouveau compte</h2>
+  <div class="fhead">
+    <button type="button" id="fprev" class="prevbtn" aria-label="Choisir un logo"></button>
+    <div class="info">
+      <label for="fname">Nom</label>
+      <input id="fname" autocomplete="off" autocapitalize="words" placeholder="ex : Crédit Agricole" required>
+      <small id="fstat"></small>
+    </div>
+  </div>
+  <div class="field">
+    <label for="femail">Email ou identifiant</label>
+    <input id="femail" type="text" list="emails" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Choisir un email ou saisir un identifiant" required>
+    <datalist id="emails"></datalist>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="field">
+    <label for="fpw">Mot de passe</label>
+    <div class="pwrow">
+      <input id="fpw" type="password" autocomplete="new-password" required>
+      <button class="sb" id="feye" type="button">Voir</button>
+      <button class="sb" id="fgen" type="button">Générer</button>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="fcancel" type="button">Annuler</button>
+    <button class="btn primary" type="submit">Enregistrer</button>
+  </div>
+</form></dialog>
+
+<dialog id="dmenu"><div class="box menu">
+  <h2>Menu</h2>
+  <button class="btn primary" id="mshare" type="button">Envoyer vers Google Drive</button>
+  <button class="btn" id="mxl" type="button">Télécharger en Excel</button>
+  <button class="btn" id="mxi" type="button">Importer un fichier Excel</button>
+  <button class="btn" id="mchg" type="button">Changer le code</button>
+  <button class="btn" id="mlock" type="button">Verrouiller</button>
+  <button class="btn" id="mclose" type="button">Fermer</button>
+  <input type="file" id="xfile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+</div></dialog>
+
+<dialog id="dinfo"><div class="box">
+  <h2>Fichier téléchargé</h2>
+  <p class="hint">Depuis un fichier local, le navigateur ne peut pas envoyer directement vers Drive. Pour l'y ajouter :</p>
+  <ol class="hint"><li>Ouvre l'appli Google Drive</li><li>Touche « + » puis « Importer »</li><li>Choisis le fichier dans « Téléchargements »</li></ol>
+  <button class="btn primary" id="iclose" type="button">OK</button>
+</div></dialog>
+
+<dialog id="dpw"><form class="box" id="pwform" autocomplete="off">
+  <h2 id="pwt"></h2>
+  <input type="password" id="pw1" autocomplete="off">
+  <input type="password" id="pw2" autocomplete="off" placeholder="Confirmer">
+  <div class="err" id="pwerr"></div>
+  <div class="actions">
+    <button class="btn" id="pwcancel" type="button">Annuler</button>
+    <button class="btn primary" type="submit">OK</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlogo"><div class="box">
+  <h2>Choisir un logo</h2>
+  <p class="hint" id="lstat"></p>
+  <div class="lgrid" id="lgrid"></div>
+  <div class="pwrow">
+    <input id="ldom" placeholder="Autre site, ex : exemple.fr" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <button class="sb" id="lgo" type="button">Chercher</button>
+  </div>
+  <div class="actions">
+    <button class="btn" id="lnone" type="button">Sans logo</button>
+    <button class="btn" id="lclose" type="button">Fermer</button>
+  </div>
+</div></dialog>
+
+<dialog id="dpin"><div class="box">
+  <h2 id="pint"></h2>
+  <div id="pinhost"></div>
+  <button class="btn" id="pincancel" type="button">Annuler</button>
+</div></dialog>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const c of kids)e.append(c);return e};
+
+if(!window.crypto||!crypto.subtle){
+  document.body.textContent='Le chiffrement (Web Crypto) n\'est pas disponible ici. Ouvre PhonePassword via https://.';
+  return;
+}
+
+/* ---------- logo de l'appli ---------- */
+const LOGO_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#4f46e5"/><path d="M32 8V52M13 41L51 19M13 19L51 41" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M27.5 33v-5a4.5 4.5 0 0 1 9 0v5" fill="none" stroke="#fbbf24" stroke-width="3.2" stroke-linecap="round"/><rect x="23" y="32" width="18" height="15" rx="3" fill="#fbbf24" stroke="#4f46e5" stroke-width="2.5"/><circle cx="32" cy="38.2" r="2.1" fill="#4f46e5"/><rect x="31.2" y="38.8" width="1.6" height="4" rx=".8" fill="#4f46e5"/></svg>';
+const LOGO_URI='data:image/svg+xml,'+encodeURIComponent(LOGO_SVG);
+$('#biglogo').src=LOGO_URI;
+$('#hlogo').src=LOGO_URI;
+$('#fav').href=LOGO_URI;
+(()=>{ // icône d'écran d'accueil (PNG) générée depuis le SVG
+  const i=new Image();
+  i.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=180;c.getContext('2d').drawImage(i,0,0,180,180);$('#touch').href=c.toDataURL('image/png')}catch{}};
+  i.src=LOGO_URI;
+})();
+
+/* ---------- utilitaires ---------- */
+const LS='passe.vault.v1', ITER=600000, IDLE_MS=5*60*1000, AWAY_MS=60*1000;
+const enc=new TextEncoder(), dec=new TextDecoder();
+const b64=buf=>{let s='';const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const fold=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const rnd=n=>{const lim=Math.floor(0x100000000/n)*n;const a=new Uint32Array(1);do{crypto.getRandomValues(a)}while(a[0]>=lim);return a[0]%n};
+const genPw=(len=20)=>{const cs='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?-_+=';let s='';for(let i=0;i<len;i++)s+=cs[rnd(cs.length)];return s};
+const uid=()=>Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>b.toString(16).padStart(2,'0')).join('');
+
+function toast(msg){
+  const host=document.querySelector('dialog[open]')||document.body;
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=el('div',{class:'toast'},msg);host.append(t);setTimeout(()=>t.remove(),2200);
+}
+let clipT=null;
+async function copy(text,label){
+  try{await navigator.clipboard.writeText(text)}
+  catch{
+    const ta=el('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0';
+    (document.querySelector('dialog[open]')||document.body).append(ta);ta.select();
+    try{document.execCommand('copy')}catch{}
+    ta.remove();
+  }
+  toast(label+' copié (effacé du presse-papiers dans 30 s)');
+  clearTimeout(clipT);
+  clipT=setTimeout(()=>{try{navigator.clipboard.writeText('').catch(()=>{})}catch{}},30000);
+}
+
+/* ---------- coffre chiffré (AES-GCM + PBKDF2) ---------- */
+let key=null, salt=null, curIter=ITER, entries=[], curPin='';
+
+async function derive(pw,saltBytes,iter){
+  const base=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function openPayload(p,pw){
+  const iter=p.iter||ITER, s=unb64(p.salt);
+  const k=await derive(pw,s,iter);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(p.iv)},k,unb64(p.data));
+  const list=JSON.parse(dec.decode(pt));
+  if(!Array.isArray(list))throw new Error('format');
+  return {k,s,iter,list:list.filter(x=>x&&((x.del===true&&x.id)||(typeof x.name==='string'&&typeof x.email==='string'&&typeof x.pw==='string'))).map(x=>({id:String(x.id||uid()),name:typeof x.name==='string'?x.name:'',email:typeof x.email==='string'?x.email:'',pw:typeof x.pw==='string'?x.pw:'',domain:typeof x.domain==='string'?x.domain:'',logo:typeof x.logo==='string'?x.logo:undefined,logoV:Number(x.logoV)||undefined,del:x.del===true||undefined,t:Number(x.t)||Date.now(),u:Number(x.u)||Number(x.t)||0}))};
+}
+async function persist(){
+  if(!key)throw new Error('locked');
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(entries)));
+  localStorage.setItem(LS,JSON.stringify({v:2,iter:curIter,salt:b64(salt),iv:b64(iv),data:b64(ct)}));
+}
+async function save(){
+  try{await persist();return true}
+  catch(e){toast('Échec de l\'enregistrement');return false}
+}
+async function createVault(pw){
+  salt=crypto.getRandomValues(new Uint8Array(16));curIter=ITER;
+  key=await derive(pw,salt,curIter);entries=[];
+  await persist();
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
+}
+async function unlockVault(pw,badMsg){
+  let p;
+  try{p=JSON.parse(localStorage.getItem(LS))}catch{throw new Error('Coffre illisible')}
+  let r;
+  try{r=await openPayload(p,pw)}catch{throw new Error(badMsg||'Code incorrect')}
+  key=r.k;salt=r.s;curIter=r.iter;entries=r.list;
+}
+
+/* ---------- pavé numérique (6 chiffres) ---------- */
+function pinPad(host,onComplete){
+  let val='',busy=false;
+  const dots=el('div',{class:'dots'},...Array.from({length:6},()=>el('i')));
+  const err=el('div',{class:'err perr'});
+  const draw=()=>[...dots.children].forEach((d,i)=>d.classList.toggle('on',i<val.length));
+  const press=async d=>{
+    if(busy||val.length>=6)return;
+    val+=d;draw();err.textContent='';
+    if(val.length===6){busy=true;const pin=val;try{await onComplete(pin)}finally{busy=false}}
+  };
+  const back=()=>{if(busy)return;val=val.slice(0,-1);draw()};
+  const key=(label,fn,cls)=>el('button',{class:'key'+(cls?' '+cls:''),type:'button',tabindex:'-1',onclick:fn},label);
+  const grid=el('div',{class:'pad'});
+  for(const n of '123456789')grid.append(key(n,()=>press(n)));
+  grid.append(el('span'),key('0',()=>press('0')),key('⌫',back,'fn'));
+  // le clavier (téléphone ou ordinateur) est ignoré : seuls les boutons à l'écran comptent
+  ['keydown','keyup','keypress'].forEach(t=>host.addEventListener(t,e=>e.preventDefault()));
+  host.replaceChildren(dots,err,grid);
+  return{reset(msg){val='';draw();err.textContent=msg||''}};
+}
+function askPin(title,confirm){
+  return new Promise(res=>{
+    const d=$('#dpin'),t=$('#pint');let first='',done=false;
+    t.textContent=title;
+    const finish=v=>{if(done)return;done=true;d.onclose=null;if(d.open)d.close();res(v)};
+    const pad=pinPad($('#pinhost'),async pin=>{
+      if(confirm){
+        if(!first){first=pin;t.textContent='Confirme le code';pad.reset();return}
+        if(pin!==first){first='';t.textContent=title;pad.reset('Les deux codes ne correspondent pas');return}
+      }
+      finish(pin);
+    });
+    $('#pincancel').onclick=()=>finish(null);
+    d.onclose=()=>finish(null);
+    d.showModal();
+  });
+}
+
+/* ---------- limitation des essais ---------- */
+const LF='passe.fail';
+const getFail=()=>{try{return JSON.parse(localStorage.getItem(LF))||{n:0,until:0}}catch{return{n:0,until:0}}};
+const failWait=()=>Math.max(0,getFail().until-Date.now());
+function noteFail(){const f=getFail();f.n++;if(f.n>=5)f.until=Date.now()+Math.min(30000*2**(f.n-5),3600000);localStorage.setItem(LF,JSON.stringify(f))}
+const clearFail=()=>localStorage.removeItem(LF);
+
+/* ---------- verrouillage ---------- */
+let idleT=null, hiddenAt=0, lockPad=null, lockMode='unlock', firstPin='';
+function resetIdle(){clearTimeout(idleT);if(key)idleT=setTimeout(showLock,IDLE_MS)}
+['pointerdown','keydown','touchstart','scroll'].forEach(ev=>addEventListener(ev,resetIdle,{passive:true}));
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){hiddenAt=Date.now()}
+  else if(key&&hiddenAt&&Date.now()-hiddenAt>AWAY_MS){showLock()}
+});
+const newMsg=()=>lockMode==='new'
+  ?'Choisis un code à 6 chiffres. Il chiffre tout le contenu et ne peut pas être récupéré s\'il est perdu.'
+  :'Ancien coffre ouvert. Choisis maintenant ton code à 6 chiffres.';
+function showLock(){
+  key=null;salt=null;entries=[];curPin='';firstPin='';clearTimeout(idleT);
+  document.querySelectorAll('dialog[open]').forEach(d=>d.close());
+  $('#grid').replaceChildren();$('#q').value='';
+  $('#app').hidden=true;$('#lock').hidden=false;
+  $('#legacy').hidden=true;$('#padhost').hidden=false;$('#lockerr').textContent='';$('#mp1').value='';
+  const raw=localStorage.getItem(LS);let p=null;
+  try{p=raw&&JSON.parse(raw)}catch{}
+  if(!raw){lockMode='new';$('#lockmsg').textContent=newMsg()}
+  else if(p&&p.v===1){
+    lockMode='legacy';$('#padhost').hidden=true;$('#legacy').hidden=false;
+    $('#lockmsg').textContent='Ton coffre utilise encore un mot de passe texte. Saisis-le une dernière fois, puis choisis un code à 6 chiffres.';
+  }
+  else{lockMode='unlock';$('#lockmsg').textContent='Entre ton code.'}
+  lockPad=pinPad($('#padhost'),onLockPin);
+}
+function enterApp(){
+  $('#lock').hidden=true;$('#app').hidden=false;
+  render();resetIdle();upgradeLogos();
+}
+async function onLockPin(pin){
+  try{
+    if(lockMode==='unlock'){
+      const w=failWait();
+      if(w>0){lockPad.reset('Trop d\'essais. Réessaie dans '+Math.ceil(w/1000)+' s');return}
+      try{await unlockVault(pin)}catch(e){noteFail();lockPad.reset(e.message);return}
+      clearFail();curPin=pin;enterApp();return;
+    }
+    if(!firstPin){firstPin=pin;$('#lockmsg').textContent='Confirme le code.';lockPad.reset();return}
+    if(pin!==firstPin){firstPin='';$('#lockmsg').textContent=newMsg();lockPad.reset('Les deux codes ne correspondent pas');return}
+    firstPin='';curPin=pin;
+    if(lockMode==='new'){await createVault(pin)}
+    else{salt=crypto.getRandomValues(new Uint8Array(16));curIter=ITER;key=await derive(pin,salt,curIter);await persist()}
+    enterApp();
+  }catch(e){lockPad.reset('Erreur : '+e.message)}
+}
+$('#legacy').addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  const b=$('#lockbtn');b.disabled=true;$('#lockerr').textContent='';
+  try{
+    await unlockVault($('#mp1').value,'Mot de passe incorrect');
+    $('#mp1').value='';lockMode='migrate';firstPin='';
+    $('#legacy').hidden=true;$('#padhost').hidden=false;$('#lockmsg').textContent=newMsg();
+  }catch(e){$('#lockerr').textContent=e.message}
+  finally{b.disabled=false}
+});
+$('#block').addEventListener('click',showLock);
+$('#mlock').addEventListener('click',showLock);
+
+/* ---------- logos ---------- */
+const KNOWN={
+ 'credit agricole':'credit-agricole.fr','credit mutuel':'creditmutuel.fr','lcl':'lcl.fr','bnp paribas':'mabanque.bnpparibas',
+ 'societe generale':'societegenerale.fr','la banque postale':'labanquepostale.fr','caisse d epargne':'caisse-epargne.fr',
+ 'boursorama':'boursorama.com','boursorama banque':'boursorama.com','revolut':'revolut.com','n26':'n26.com','paypal':'paypal.com',
+ 'orange':'orange.fr','sfr':'sfr.fr','free':'free.fr','free mobile':'mobile.free.fr','bouygues telecom':'bouyguestelecom.fr',
+ 'amazon':'amazon.fr','netflix':'netflix.com','prime video':'primevideo.com','disney plus':'disneyplus.com','canal plus':'canalplus.com',
+ 'google':'google.com','gmail':'gmail.com','youtube':'youtube.com','facebook':'facebook.com','instagram':'instagram.com',
+ 'twitter':'x.com','x':'x.com','linkedin':'linkedin.com','github':'github.com','apple':'apple.com','icloud':'icloud.com',
+ 'microsoft':'microsoft.com','outlook':'outlook.com','spotify':'spotify.com','supabase':'supabase.com','cloudflare':'cloudflare.com',
+ 'ovh':'ovhcloud.com','impots':'impots.gouv.fr','ameli':'ameli.fr','la poste':'laposte.fr','edf':'edf.fr','engie':'engie.fr',
+ 'leboncoin':'leboncoin.fr','fnac':'fnac.com','carrefour':'carrefour.fr','sncf connect':'sncf-connect.com','sncf':'sncf-connect.com',
+ 'cdiscount':'cdiscount.com','darty':'darty.com','steam':'steampowered.com','discord':'discord.com','twitch':'twitch.tv'
+};
+function candidates(name){
+  let n=fold(name).replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];
+  if(/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(n))return{trusted:true,list:[n]};
+  const k=fold(name).replace(/[^a-z0-9]+/g,' ').trim();
+  if(KNOWN[k])return{trusted:true,list:[KNOWN[k]]};
+  const a=k.replace(/ /g,''), h=k.replace(/ /g,'-');
+  if(!a)return{trusted:false,list:[]};
+  const bases=[...new Set([a,h])], out=[];
+  for(const t of ['com','fr','net','org'])for(const b of bases)out.push(b+'.'+t);
+  return{trusted:false,list:out.slice(0,8)};
+}
+const MIN_PX=128, LOGO_V=3;
+const GOOG=(d,s)=>'https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://'+d+'&size='+s;
+const DDG=d=>'https://icons.duckduckgo.com/ip3/'+d+'.ico';
+const SITE_PATHS=['/apple-touch-icon.png','/apple-touch-icon-precomposed.png','/apple-touch-icon-180x180.png','/android-chrome-192x192.png','/android-chrome-512x512.png','/favicon-196x196.png','/icon-192x192.png','/icon-512x512.png'];
+function loadImg(url,cors){
+  return new Promise(res=>{
+    const i=new Image();if(cors)i.crossOrigin='anonymous';i.referrerPolicy='no-referrer';
+    const t=setTimeout(()=>res(null),7000);
+    i.onload=()=>{clearTimeout(t);res(i)};
+    i.onerror=()=>{clearTimeout(t);res(null)};
+    i.src=url;
+  });
+}
+const hostOf=u=>{try{return new URL(/^https?:/i.test(u)?u:'https://'+u).hostname.replace(/^www\./,'')}catch{return ''}};
+const squareHD=im=>!!im&&im.naturalWidth>=MIN_PX&&im.naturalHeight>=MIN_PX&&Math.abs(im.naturalWidth-im.naturalHeight)<=Math.max(im.naturalWidth,im.naturalHeight)*.2;
+const gcd=(a,b)=>{while(b){[a,b]=[b,a%b]}return a};
+// analyse des pixels (RGBA, n×n) : refuse les images floues (agrandies) ou en gros blocs
+function sharpData(px,n){
+  const L=new Float32Array(n*n);let mn=255,mx=0;
+  for(let i=0;i<n*n;i++){
+    const a=px[i*4+3]/255;
+    const l=(.299*px[i*4]+.587*px[i*4+1]+.114*px[i*4+2])*a+255*(1-a);
+    L[i]=l;if(l<mn)mn=l;if(l>mx)mx=l;
+  }
+  const rg=mx-mn;if(rg<40)return false;
+  let edge=0,strong=0,gx=0,gy=0,tx=0,ty=0;
+  for(let y=0;y<n;y++)for(let x=1;x<n;x++){
+    const d=Math.abs(L[y*n+x]-L[y*n+x-1]);
+    if(d>=.12*rg){edge++;if(d>=.45*rg)strong++}
+    if(d>10){gx=gcd(gx,x);tx++}
+  }
+  for(let y=1;y<n;y++)for(let x=0;x<n;x++){
+    const d=Math.abs(L[y*n+x]-L[(y-1)*n+x]);
+    if(d>=.12*rg){edge++;if(d>=.45*rg)strong++}
+    if(d>10){gy=gcd(gy,y);ty++}
+  }
+  if(edge<30)return false;
+  if((tx>=15&&gx>=3)||(ty>=15&&gy>=3))return false;
+  return strong/edge>=0.35;
+}
+function isSharp(im){
+  try{
+    const n=Math.min(im.naturalWidth,192);
+    const c=document.createElement('canvas');c.width=c.height=n;
+    const x=c.getContext('2d',{willReadFrequently:true});
+    x.drawImage(im,0,0,n,n);
+    return sharpData(x.getImageData(0,0,n,n).data,n);
+  }catch{return false}
+}
+// Wikidata : trouve les marques/entreprises portant ce nom, avec leur logo officiel et leur site
+async function wikidata(name){
+  const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(),8000);
+  try{
+    const get=u=>fetch(u,{signal:ctl.signal,referrerPolicy:'no-referrer'}).then(r=>r.json());
+    const base='https://www.wikidata.org/w/api.php?format=json&origin=*';
+    const r1=await get(base+'&action=wbsearchentities&type=item&limit=8&language=fr&uselang=fr&search='+encodeURIComponent(name));
+    const found=r1.search||[];
+    if(!found.length)return [];
+    const r2=await get(base+'&action=wbgetentities&props=claims&ids='+found.map(f=>f.id).join('|'));
+    const out=[];
+    for(const f of found){
+      const en=r2.entities&&r2.entities[f.id];if(!en)continue;
+      const val=p=>{const c=en.claims&&en.claims[p];const v=c&&c[0]&&c[0].mainsnak&&c[0].mainsnak.datavalue;return v&&typeof v.value==='string'?v.value:''};
+      const logoFile=val('P154')||val('P8972'), site=val('P856');
+      if(!logoFile&&!site)continue; // ni logo ni site : pas une marque
+      out.push({label:f.label||name,desc:f.description||'',logoFile,site});
+    }
+    return out;
+  }catch{return []}
+  finally{clearTimeout(t)}
+}
+async function existingDomains(name,extra){
+  const list=[];
+  if(extra)list.push(extra);
+  const c=candidates(name);
+  if(c.trusted)list.push(...c.list);
+  else{
+    const ims=await Promise.all(c.list.map(d=>loadImg(GOOG(d,64),false)));
+    c.list.forEach((d,i)=>{if(ims[i])list.push(d)});
+  }
+  return [...new Set(list)];
+}
+// logos proposés pour un site : icône d'accueil du site, service Google (si net), puis sources plus modestes
+async function siteOptions(d){
+  const hosts=d.startsWith('www.')?[d]:[d,'www.'+d];
+  const urls=[];for(const hh of hosts)for(const p of SITE_PATHS)urls.push('https://'+hh+p);
+  const g=GOOG(d,256);
+  const [ims,gc,gl,dd]=await Promise.all([Promise.all(urls.map(u=>loadImg(u,false))),loadImg(g,true),loadImg(g,false),loadImg(DDG(d),false)]);
+  const out=[];
+  let best=-1,bw=0;
+  ims.forEach((im,k)=>{if(squareHD(im)&&im.naturalWidth>bw){best=k;bw=im.naturalWidth}});
+  if(best>=0)out.push({url:urls[best],domain:d,hd:true,label:d});
+  if(gc&&gc.naturalWidth>=MIN_PX&&isSharp(gc))out.push({url:g,domain:d,hd:true,label:d});
+  else if(gc||gl)out.push({url:g,domain:d,hd:false,label:d});
+  if(dd)out.push({url:DDG(d),domain:d,hd:false,label:d});
+  return out;
+}
+// jusqu'à 6 logos : nets d'abord (logos officiels Wikimedia, icônes du site), puis ceux de moindre qualité
+async function gatherLogos(name,extra){
+  const [wd,ex]=await Promise.all([wikidata(name),existingDomains(name,extra)]);
+  const wopts=(await Promise.all(wd.filter(w=>w.logoFile).map(async w=>{
+    const url='https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(w.logoFile)+'?width=256';
+    const im=await loadImg(url,false);
+    return im?{url,domain:hostOf(w.site),hd:im.naturalWidth>=MIN_PX,label:w.label,sub:w.desc}:null;
+  }))).filter(Boolean);
+  const doms=[...new Set([...(extra?[extra]:[]),...wd.map(w=>hostOf(w.site)).filter(Boolean),...ex])].slice(0,4);
+  const sopts=(await Promise.all(doms.map(siteOptions))).flat();
+  const all=[...wopts,...sopts],seen=new Set(),res=[];
+  for(const tier of [true,false])for(const o of all)if(o.hd===tier&&!seen.has(o.url)){seen.add(o.url);res.push(o)}
+  return res.slice(0,6);
+}
+function colorFor(name){let h=0;for(const ch of name)h=(h*31+ch.charCodeAt(0))>>>0;return 'hsl('+(h%360)+',50%,42%)'}
+function tile(e){
+  const t=el('div',{class:'tile'},el('span',{class:'ltr'},(e.name.trim()[0]||'?').toUpperCase()));
+  t.style.background=colorFor(e.name||'?');
+  if(e.logo){
+    const i=new Image();i.alt='';i.referrerPolicy='no-referrer';i.decoding='async';
+    if(SITE_PATHS.some(p=>e.logo.endsWith(p)))i.className='big'; // icônes d'écran d'accueil : plein cadre
+    i.onload=()=>t.classList.add('hasimg');
+    i.onerror=()=>i.remove();
+    i.src=e.logo;t.append(i);
+  }
+  return t;
+}
+let upgrading=false;
+async function upgradeLogos(){
+  if(upgrading)return;upgrading=true;
+  try{
+    let changed=false;
+    for(const e of [...entries]){
+      if(!key)break;
+      if(e.del||e.logoV===LOGO_V)continue;
+      const opts=await gatherLogos(e.name,e.domain||'');
+      if(!opts.length)continue; // hors ligne ou rien trouvé : on réessaiera
+      const o=opts.find(x=>x.hd);
+      e.logo=o?o.url:'';if(o&&o.domain)e.domain=o.domain;
+      e.logoV=LOGO_V;changed=true;
+    }
+    if(changed&&key){await save();render()}
+  }finally{upgrading=false}
+}
+
+/* ---------- liste ---------- */
+function render(){
+  const q=fold($('#q').value);
+  const list=entries.filter(e=>!e.del).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}))
+    .filter(e=>!q||fold(e.name).includes(q)||fold(e.email).includes(q));
+  $('#grid').replaceChildren(...list.map(e=>el('button',{class:'app',type:'button',onclick:()=>openView(e)},tile(e),el('span',{},e.name))));
+  $('#empty').hidden=entries.some(e=>!e.del);
+}
+$('#q').addEventListener('input',render);
+
+/* ---------- fiche ---------- */
+let cur=null, delT=null;
+function row(label,val,secret){
+  let shown=!secret;
+  const v=el('div',{class:'val'},shown?val:'••••••••••');
+  const bs=el('div',{class:'rb'});
+  if(secret){
+    const eye=el('button',{class:'sb',type:'button',onclick:()=>{shown=!shown;v.textContent=shown?val:'••••••••••';eye.textContent=shown?'Masquer':'Voir'}},'Voir');
+    bs.append(eye);
+  }
+  bs.append(el('button',{class:'sb main',type:'button',onclick:()=>copy(val,label)},'Copier'));
+  return el('div',{class:'vrow'},el('div',{class:'lab'},label),el('div',{class:'line'},v,bs));
+}
+function openView(e){
+  cur=e;
+  $('#vhead').replaceChildren(tile(e),el('h2',{},e.name));
+  $('#vrows').replaceChildren(row('Email / identifiant',e.email,false),row('Mot de passe',e.pw,true));
+  const b=$('#vdel');b.textContent='Supprimer';b.dataset.arm='';clearTimeout(delT);
+  $('#dview').showModal();
+}
+$('#vclose').addEventListener('click',()=>$('#dview').close());
+$('#vedit').addEventListener('click',()=>{const e=cur;$('#dview').close();openForm(e)});
+$('#vdel').addEventListener('click',async()=>{
+  const b=$('#vdel');
+  if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Confirmer ?';delT=setTimeout(()=>{b.dataset.arm='';b.textContent='Supprimer'},3000);return}
+  Object.assign(cur,{del:true,u:Date.now(),name:'',email:'',pw:'',domain:'',logo:'',logoV:undefined});
+  if(await save()){$('#dview').close();render()}
+});
+
+/* ---------- formulaire ---------- */
+let editing=null, fstate={name:'',domain:'',logo:''}, tok=0, ftimer=null;
+function renderEmails(){
+  const count={};
+  entries.forEach(e=>{if(!e.del)count[e.email]=(count[e.email]||0)+1});
+  const list=Object.keys(count).filter(m=>m.includes('@')).sort((a,b)=>count[b]-count[a]||a.localeCompare(b));
+  $('#emails').replaceChildren(...list.map(m=>el('option',{value:m})));
+  $('#chips').replaceChildren(...list.map(m=>el('button',{class:'chip',type:'button',onclick:()=>{$('#femail').value=m}},m)));
+}
+function updatePreview(){
+  $('#fprev').replaceChildren(tile({name:$('#fname').value||'?',domain:fstate.domain,logo:fstate.logo}),el('span',{class:'pedit'},'✎'));
+}
+let lastG={name:'',extra:'',opts:null}, lTok=0;
+async function runGather(name,extra){
+  const opts=await gatherLogos(name,extra||'');
+  lastG={name,extra:extra||'',opts};
+  return opts;
+}
+async function lookup(){
+  const name=$('#fname').value.trim(), my=++tok;
+  if(!name){fstate={name:'',domain:'',logo:''};$('#fstat').textContent='';updatePreview();return}
+  $('#fstat').textContent='Recherche du logo…';
+  const opts=await runGather(name);
+  if(my!==tok)return;
+  const o=opts.find(x=>x.hd);
+  fstate={name,domain:o?o.domain:'',logo:o?o.url:'',done:true};
+  $('#fstat').textContent=o?(o.label||o.domain):(opts.length?'Aucun logo net : touche l\'icône pour choisir':'Aucun logo trouvé : touche l\'icône pour chercher');
+  updatePreview();
+}
+function showOpts(opts){
+  $('#lstat').textContent=opts.length?'Touche le logo à utiliser.':'Aucun logo trouvé. Essaie avec le site officiel ci-dessous.';
+  $('#lgrid').replaceChildren(...opts.map(o=>{
+    const i=new Image();i.alt='';i.referrerPolicy='no-referrer';i.src=o.url;
+    const kids=[el('div',{class:'lbox'},i),el('span',{class:'lcap'},o.label||o.domain||'')];
+    if(!o.hd)kids.push(el('span',{class:'lwarn'},'basse qualité'));
+    return el('button',{class:'lopt'+(fstate.logo===o.url?' sel':''),type:'button',onclick:()=>pickLogo(o)},...kids);
+  }));
+}
+function pickLogo(o){
+  tok++;
+  fstate={name:$('#fname').value.trim(),domain:o?o.domain:'',logo:o?o.url:'',done:true};
+  $('#fstat').textContent=o?(o.label||o.domain):'Sans logo';
+  updatePreview();$('#dlogo').close();
+}
+$('#fprev').addEventListener('click',async()=>{
+  const name=$('#fname').value.trim();
+  if(!name){toast('Saisis d\'abord un nom');return}
+  $('#ldom').value='';$('#lgrid').replaceChildren();$('#lstat').textContent='Recherche de logos…';
+  $('#dlogo').showModal();
+  const my=++lTok;
+  const opts=(lastG.name===name&&!lastG.extra&&lastG.opts)?lastG.opts:await runGather(name);
+  if(my===lTok)showOpts(opts);
+});
+$('#lgo').addEventListener('click',async()=>{
+  const d=hostOf($('#ldom').value.trim());
+  if(!d||!d.includes('.')){toast('Saisis un site, ex : exemple.fr');return}
+  $('#lstat').textContent='Recherche…';
+  const my=++lTok;
+  const opts=await runGather($('#fname').value.trim(),d);
+  if(my===lTok)showOpts(opts);
+});
+$('#lnone').addEventListener('click',()=>pickLogo(null));
+$('#lclose').addEventListener('click',()=>$('#dlogo').close());
+$('#fname').addEventListener('input',()=>{clearTimeout(ftimer);fstate={name:'',domain:'',logo:''};updatePreview();ftimer=setTimeout(lookup,900)});
+function openForm(e){
+  editing=e||null;
+  $('#ftitle').textContent=e?'Modifier':'Nouveau compte';
+  $('#fname').value=e?e.name:'';$('#femail').value=e?e.email:'';$('#fpw').value=e?e.pw:'';
+  $('#fpw').type='password';$('#feye').textContent='Voir';
+  fstate={name:e?e.name:'',domain:e?e.domain:'',logo:e?e.logo:'',done:!!(e&&e.logoV===LOGO_V)};tok++;
+  $('#fstat').textContent=e&&e.domain?e.domain:'';
+  renderEmails();updatePreview();
+  $('#dform').showModal();
+  if(!e)setTimeout(()=>$('#fname').focus(),50);
+}
+$('#fab').addEventListener('click',()=>openForm(null));
+$('#fcancel').addEventListener('click',()=>$('#dform').close());
+$('#feye').addEventListener('click',()=>{const p=$('#fpw');const show=p.type==='password';p.type=show?'text':'password';$('#feye').textContent=show?'Masquer':'Voir'});
+$('#fgen').addEventListener('click',()=>{$('#fpw').value=genPw();$('#fpw').type='text';$('#feye').textContent='Masquer'});
+$('#fform').addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  const name=$('#fname').value.trim(), email=$('#femail').value.trim(), pw=$('#fpw').value;
+  if(!name||!email||!pw)return;
+  let e=editing;
+  if(!e){e={id:uid(),t:Date.now(),domain:'',logo:'',logoV:undefined};entries.push(e)}
+  e.u=Date.now();
+  const renamed=e.name!==name;
+  e.name=name;e.email=email;e.pw=pw;
+  let pending=false;
+  if(fstate.name===name){e.domain=fstate.domain;e.logo=fstate.logo;e.logoV=fstate.done?LOGO_V:undefined}
+  else if(renamed||!e.domain){e.domain='';e.logo='';e.logoV=undefined;pending=true}
+  if(!(await save()))return;
+  $('#dform').close();render();
+  if(pending){
+    gatherLogos(name,'').then(async opts=>{
+      if(!opts.length)return;
+      const o=opts.find(x=>x.hd);
+      if(key&&entries.includes(e)&&e.name===name&&e.logoV!==LOGO_V){e.domain=o?o.domain:'';e.logo=o?o.url:'';e.logoV=LOGO_V;await save();render()}
+    });
+  }else{upgradeLogos()}
+});
+
+/* ---------- menu, export, import, mot de passe maître ---------- */
+function askPw(title,confirm){
+  return new Promise(res=>{
+    const d=$('#dpw'),a=$('#pw1'),b=$('#pw2');
+    $('#pwt').textContent=title;a.value='';b.value='';b.hidden=!confirm;$('#pwerr').textContent='';
+    a.placeholder=confirm?'Nouveau mot de passe maître':'Mot de passe maître';
+    let done=false;
+    const finish=v=>{if(done)return;done=true;d.onclose=null;if(d.open)d.close();res(v)};
+    $('#pwform').onsubmit=ev=>{
+      ev.preventDefault();
+      if(confirm){
+        if(a.value.length<8){$('#pwerr').textContent='8 caractères minimum';return}
+        if(a.value!==b.value){$('#pwerr').textContent='Les deux champs ne correspondent pas';return}
+      }else if(!a.value){return}
+      finish(a.value);
+    };
+    $('#pwcancel').onclick=()=>finish(null);
+    d.onclose=()=>finish(null);
+    d.showModal();a.focus();
+  });
+}
+$('#bmenu').addEventListener('click',()=>$('#dmenu').showModal());
+$('#mclose').addEventListener('click',()=>$('#dmenu').close());
+$('#mchg').addEventListener('click',async()=>{
+  $('#dmenu').close();
+  const pin=await askPin('Nouveau code',true);
+  if(!pin)return;
+  salt=crypto.getRandomValues(new Uint8Array(16));curIter=ITER;
+  key=await derive(pin,salt,curIter);curPin=pin;
+  if(await save())toast('Code changé');
+});
+
+/* ---------- fusion (ordinateur / téléphone / Excel) ---------- */
+function mergeIn(remote){
+  const idx=new Map(entries.map((e,i)=>[e.id,i]));let changed=false;
+  for(const r of remote){
+    if(!idx.has(r.id)){entries.push(r);idx.set(r.id,entries.length-1);changed=true;continue}
+    const i=idx.get(r.id),l=entries[i];
+    const newer=(r.u||0)>(l.u||0);
+    const edited=(r.u||0)===(l.u||0)&&(r.name!==l.name||r.email!==l.email||r.pw!==l.pw||!!r.del!==!!l.del); // modifié à la main dans Excel
+    if(newer||edited){entries[i]={...r,logo:r.logo||l.logo,domain:r.domain||l.domain,logoV:l.logoV||r.logoV};changed=true}
+  }
+  return changed;
+}
+
+/*XLSX-START*/
+const XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC_T[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+function zipStore(files){
+  const parts=[],cen=[];let off=0;
+  for(const f of files){
+    const nm=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(12,0x21,true);
+    lh.setUint32(14,crc,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(lh.buffer),nm,f.data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(14,0x21,true);
+    ch.setUint32(16,crc,true);ch.setUint32(20,sz,true);ch.setUint32(24,sz,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+    cen.push(new Uint8Array(ch.buffer),nm);
+    off+=30+nm.length+sz;
+  }
+  const csz=cen.reduce((a,p)=>a+p.length,0);
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,csz,true);end.setUint32(16,off,true);
+  const all=[...parts,...cen,new Uint8Array(end.buffer)];
+  const out=new Uint8Array(all.reduce((a,p)=>a+p.length,0));let o=0;
+  for(const p of all){out.set(p,o);o+=p.length}
+  return out;
+}
+async function unzip(buf){
+  const u=new Uint8Array(buf), dv=new DataView(u.buffer,u.byteOffset,u.byteLength);
+  let e=-1;for(let i=u.length-22;i>=Math.max(0,u.length-70000);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break}}
+  if(e<0)throw new Error('Fichier Excel invalide');
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const out=new Map();
+  for(let k=0;k<n;k++){
+    if(dv.getUint32(p,true)!==0x02014b50)throw new Error('Fichier Excel invalide');
+    const method=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    const name=dec.decode(u.subarray(p+46,p+46+nl));
+    const start=off+30+dv.getUint16(off+26,true)+dv.getUint16(off+28,true);
+    let data=u.subarray(start,start+csz);
+    if(csz>20e6)throw new Error('Fichier Excel trop gros');
+    if(method===8){
+      if(typeof DecompressionStream==='undefined')throw new Error('Navigateur trop ancien pour lire ce fichier Excel');
+      data=new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    }else if(method!==0)throw new Error('Compression non prise en charge');
+    out.set(name,data);p+=46+nl+el+cl;
+  }
+  return out;
+}
+async function encCell(k,txt){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},k,enc.encode(txt)));
+  const all=new Uint8Array(12+ct.length);all.set(iv);all.set(ct,12);
+  return 'enc:v1:'+b64(all);
+}
+async function decCell(k,cell){
+  const raw=unb64(cell.slice(7));
+  return dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:raw.subarray(0,12)},k,raw.subarray(12)));
+}
+const xesc=s=>String(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const colL=i=>String.fromCharCode(65+i);
+function sheetXml(rows,widths,hdr){
+  const cols=widths?'<cols>'+widths.map((w,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>').join('')+'</cols>':'';
+  const body=rows.map((r,ri)=>'<row r="'+(ri+1)+'">'+r.map((v,ci)=>(v===''||v==null)?'':'<c r="'+colL(ci)+(ri+1)+'" t="inlineStr"'+(hdr&&ri===0?' s="1"':'')+'><is><t xml:space="preserve">'+xesc(v)+'</t></is></c>').join('')+'</row>').join('');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+cols+'<sheetData>'+body+'</sheetData></worksheet>';
+}
+async function buildXlsx(list,k,saltB64,iter){
+  const rows=[['Nom','Email ou identifiant','Mot de passe (chiffré)','Logo','ID','Modifié','Supprimé']];
+  for(const e of list){
+    const u=new Date(e.u||e.t||0).toISOString();
+    if(e.del)rows.push(['','','','',e.id,u,'1']);
+    else rows.push([e.name,e.email,await encCell(k,e.pw),e.logo||'',e.id,u,'']);
+  }
+  const info=[['PhonePassword'],['Version','1'],['Sel',saltB64],['Itérations',String(iter)],['Note','Les mots de passe sont chiffrés avec ton code à 6 chiffres. Pour ajouter un compte, ajoute une ligne (Nom, Email, Mot de passe en clair) : elle sera chiffrée à la prochaine synchronisation. Ne modifie pas les colonnes ID et Modifié.']];
+  const NS='http://schemas.openxmlformats.org/';
+  const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const files=[
+    ['[Content_Types].xml',X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+    ['_rels/.rels',X+'<Relationships xmlns="'+NS+'package/2006/relationships"><Relationship Id="rId1" Type="'+NS+'officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml',X+'<workbook xmlns="'+NS+'spreadsheetml/2006/main" xmlns:r="'+NS+'officeDocument/2006/relationships"><sheets><sheet name="Comptes" sheetId="1" r:id="rId1"/><sheet name="Info" sheetId="2" r:id="rId2"/></sheets></workbook>'],
+    ['xl/_rels/workbook.xml.rels',X+'<Relationships xmlns="'+NS+'package/2006/relationships"><Relationship Id="rId1" Type="'+NS+'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="'+NS+'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="'+NS+'officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+    ['xl/styles.xml',X+'<styleSheet xmlns="'+NS+'spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+    ['xl/worksheets/sheet1.xml',sheetXml(rows,[24,34,60,40,20,26,10],true)],
+    ['xl/worksheets/sheet2.xml',sheetXml(info,[18,60])]
+  ].map(([name,x])=>({name,data:enc.encode(x)}));
+  return zipStore(files);
+}
+const XQ=(node,tag)=>[...node.getElementsByTagNameNS('*',tag)];
+const colIdx=ref=>{const m=/^([A-Z]+)/.exec(ref||'');if(!m)return -1;let n=0;for(const ch of m[1])n=n*26+ch.charCodeAt(0)-64;return n-1};
+function parseSheet(doc,shared){
+  const rows=[];
+  XQ(doc,'row').forEach((r,ri)=>{
+    const arr=[];
+    XQ(r,'c').forEach(c=>{
+      const t=c.getAttribute('t');let v='';
+      if(t==='inlineStr')v=XQ(c,'t').map(x=>x.textContent).join('');
+      else{const ve=XQ(c,'v')[0];const raw=ve?ve.textContent:'';v=t==='s'?(shared[+raw]||''):raw}
+      const ci=colIdx(c.getAttribute('r'));arr[ci>=0?ci:arr.length]=v;
+    });
+    rows[(+r.getAttribute('r')||ri+1)-1]=arr;
+  });
+  return rows;
+}
+const parseU=s=>{if(!s)return 0;if(/^\d+(\.\d+)?$/.test(s)){const n=+s;return n>1e11?n:Math.round((n-25569)*86400000)}const t=Date.parse(s);return isNaN(t)?0:t};
+async function readXlsx(buf,resolveKey){
+  const files=await unzip(buf);
+  const txt=n=>files.has(n)?dec.decode(files.get(n)):null;
+  const xml=s=>new DOMParser().parseFromString(s,'application/xml');
+  const ss=txt('xl/sharedStrings.xml');
+  const shared=ss?XQ(xml(ss),'si').map(si=>XQ(si,'t').map(t=>t.textContent).join('')):[];
+  const wbx=txt('xl/workbook.xml'),rlx=txt('xl/_rels/workbook.xml.rels');
+  if(!wbx||!rlx)throw new Error('Fichier Excel invalide');
+  const relMap={};XQ(xml(rlx),'Relationship').forEach(r=>{relMap[r.getAttribute('Id')]=r.getAttribute('Target')});
+  const sheets={};
+  XQ(xml(wbx),'sheet').forEach(s=>{
+    const rid=s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')||s.getAttribute('r:id');
+    let tg=relMap[rid]||'';tg=tg.startsWith('/')?tg.slice(1):'xl/'+tg;
+    const sx=txt(tg);if(sx)sheets[s.getAttribute('name')]=parseSheet(xml(sx),shared);
+  });
+  const main=sheets['Comptes']||Object.values(sheets)[0]||[];
+  const info={};(sheets['Info']||[]).forEach(r=>{if(r&&r[0])info[fold(r[0])]=r[1]||''});
+  const hi=main.findIndex(r=>r&&r.some(Boolean));
+  if(hi<0)return [];
+  const H=(main[hi]||[]).map(x=>fold(x||''));
+  const ix=(f,d)=>{const i=H.findIndex(f);return i>=0?i:d};
+  const cN=ix(h=>h.startsWith('nom'),0),cE=ix(h=>h.includes('mail')||h.includes('identifiant'),1),cP=ix(h=>h.includes('mot de passe')||h.includes('password')||h==='mdp',2),cL=ix(h=>h.startsWith('logo'),3),cI=ix(h=>h==='id',4),cM=ix(h=>h.startsWith('modif'),5),cD=ix(h=>h.startsWith('supprim'),6);
+  const items=[];
+  for(let i=hi+1;i<main.length;i++){
+    const r=main[i];if(!r)continue;
+    const g=c=>r[c]!=null?String(r[c]):'';
+    items.push({name:g(cN).trim(),email:g(cE).trim(),pw:g(cP),logo:g(cL).trim(),id:g(cI).trim(),u:parseU(g(cM)),del:/^(1|oui|true|x)$/i.test(g(cD).trim())});
+  }
+  const sample=(items.find(x=>!x.del&&x.pw.startsWith('enc:v1:'))||{}).pw;
+  const k=sample?await resolveKey({salt:info['sel']||'',iter:Number(info['iterations'])||ITER},sample):null;
+  const list=[];
+  for(const it of items){
+    if(it.del){if(it.id)list.push({id:it.id,name:'',email:'',pw:'',domain:'',logo:'',del:true,t:it.u||Date.now(),u:it.u||Date.now()});continue}
+    if(!it.name)continue;
+    let pw=it.pw;
+    if(pw.startsWith('enc:v1:')){try{pw=await decCell(k,pw)}catch{throw new Error('Code incorrect ou fichier modifié')}}
+    list.push({id:it.id||uid(),name:it.name,email:it.email,pw,domain:'',logo:it.logo,logoV:it.logo?LOGO_V:undefined,t:it.u||Date.now(),u:it.id?(it.u||0):Date.now()});
+  }
+  return list;
+}
+/*XLSX-END*/
+
+// clé du fichier : celle du coffre si même sel, sinon le code courant, sinon on le demande
+async function resolveFileKey(info,sample){
+  if(info.salt&&info.salt===b64(salt))return key;
+  if(!info.salt)throw new Error('Fichier Excel non reconnu (feuille Info manquante)');
+  const tryPin=async pin=>{
+    const k=await derive(pin,unb64(info.salt),info.iter);
+    try{await decCell(k,sample);return k}catch{return null}
+  };
+  if(curPin){const k=await tryPin(curPin);if(k)return k}
+  for(let n=0;n<3;n++){
+    const pin=await askPin('Code de ce fichier Excel',false);
+    if(!pin)throw new Error('Import annulé');
+    const k=await tryPin(pin);if(k)return k;
+    toast('Code incorrect');
+  }
+  throw new Error('Code incorrect');
+}
+const buildApp=()=>buildXlsx(entries,key,b64(salt),curIter);
+const readApp=buf=>readXlsx(buf,resolveFileKey);
+function download(bytes,name){
+  const a=el('a',{href:URL.createObjectURL(new Blob([bytes],{type:XLSX_MIME})),download:name});
+  document.body.append(a);a.click();a.remove();
+}
+$('#mxl').addEventListener('click',async()=>{
+  try{download(await buildApp(),'PhonePassword.xlsx');toast('Excel téléchargé')}catch(e){toast(e.message)}
+});
+$('#mxi').addEventListener('click',()=>$('#xfile').click());
+$('#xfile').addEventListener('change',async ev=>{
+  const f=ev.target.files[0];ev.target.value='';if(!f)return;
+  $('#dmenu').close();
+  try{
+    const list=await readApp(await f.arrayBuffer());
+    if(!mergeIn(list)){toast('Rien de nouveau dans ce fichier');return}
+    if(await save()){render();toast('Fichier Excel importé');upgradeLogos()}
+  }catch(e){toast(e.message)}
+});
+
+/* ---------- envoi vers Google Drive (feuille de partage du téléphone) ---------- */
+$('#mshare').addEventListener('click',async()=>{
+  let bytes;
+  try{bytes=await buildApp()}catch(e){toast(e.message);return}
+  const d=new Date(),p2=n=>String(n).padStart(2,'0');
+  const name='PhonePassword-'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes())+'.xlsx';
+  // 1) fenêtre « Enregistrer sous » (permet de choisir Drive si le navigateur la propose)
+  try{
+    if(window.showSaveFilePicker){
+      const fh=await showSaveFilePicker({suggestedName:name,types:[{description:'Excel',accept:{[XLSX_MIME]:['.xlsx']}}]});
+      const w=await fh.createWritable();await w.write(bytes);await w.close();
+      $('#dmenu').close();toast('Fichier enregistré');return;
+    }
+  }catch(e){if(e&&e.name==='AbortError')return}
+  // 2) feuille de partage du téléphone (Drive, Gmail…)
+  try{
+    const file=new File([bytes],name,{type:XLSX_MIME});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      $('#dmenu').close();await navigator.share({files:[file],title:'PhonePassword'});return;
+    }
+  }catch(e){if(e&&e.name==='AbortError')return}
+  // 3) téléchargement + mode d'emploi pour l'ajouter à Drive
+  download(bytes,name);
+  $('#dmenu').close();$('#dinfo').showModal();
+});
+$('#iclose').addEventListener('click',()=>$('#dinfo').close());
+
+/* ---------- dialogues : fermeture au clic sur le fond ---------- */
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d&&d.id!=='dpw'&&d.id!=='dpin')d.close()}));
+
+showLock();
+})();
+</script>
+</body>
+</html>
