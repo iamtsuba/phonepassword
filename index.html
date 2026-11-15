@@ -75,6 +75,10 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:5px}
 .menu{display:grid;gap:8px}
 .menu .btn{text-align:left}
 ol.hint{padding-left:20px;margin:0;display:grid;gap:4px}
+.acctline{display:flex;align-items:center;justify-content:center;gap:12px;font-weight:600}
+.link{background:none;border:0;color:var(--ac);font-size:14px;text-decoration:underline;padding:0}
+.plist{display:grid;gap:8px}
+.brand small{display:block;color:var(--mut);font-size:12px;line-height:1.1}
 .prevbtn{position:relative;background:none;border:0;padding:0;flex:none}
 .pedit{position:absolute;right:-5px;bottom:-5px;width:22px;height:22px;border-radius:50%;background:var(--ac);color:var(--acx);font-size:12px;display:grid;place-items:center;border:2px solid var(--card)}
 .hint{margin:0;color:var(--mut);font-size:13px}
@@ -103,19 +107,29 @@ ol.hint{padding-left:20px;margin:0;display:grid;gap:4px}
   <div class="lockbox">
     <img id="biglogo" alt="PhonePassword">
     <h1>PhonePassword</h1>
+    <div class="acctline" id="acctline" hidden><span id="acctname"></span><button class="link" id="acctswitch" type="button">Changer de compte</button></div>
     <p id="lockmsg"></p>
+    <div class="plist" id="picker" hidden></div>
+    <form id="newform" autocomplete="off" hidden>
+      <input id="npseudo" placeholder="Pseudo" maxlength="24" autocomplete="off" autocapitalize="words" spellcheck="false">
+      <button class="btn primary" type="submit">Continuer</button>
+      <button class="btn" id="ncancel" type="button">Retour</button>
+      <button class="link" id="nimport" type="button">J'ai déjà un fichier de compte (Excel)</button>
+      <div class="err" id="nerr"></div>
+    </form>
     <div id="padhost"></div>
     <form id="legacy" autocomplete="off" hidden>
       <input type="password" id="mp1" placeholder="Ancien mot de passe maître" autocomplete="off">
       <button class="btn primary" id="lockbtn" type="submit">Ouvrir l'ancien coffre</button>
       <div class="err" id="lockerr"></div>
     </form>
+    <input type="file" id="afile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
   </div>
 </div>
 
 <div id="app" hidden>
   <header>
-    <div class="brand"><img id="hlogo" alt=""><b>PhonePassword</b></div>
+    <div class="brand"><img id="hlogo" alt=""><div><b>PhonePassword</b><small id="hpseudo"></small></div></div>
     <div class="hbtns">
       <button class="hb" id="bmenu" type="button" aria-label="Menu">⋯</button>
       <button class="hb" id="block" type="button" aria-label="Verrouiller">🔒</button>
@@ -180,6 +194,13 @@ ol.hint{padding-left:20px;margin:0;display:grid;gap:4px}
   <input type="file" id="xfile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 </div></dialog>
 
+<dialog id="dacct"><div class="box">
+  <h2>Compte créé</h2>
+  <p class="hint">Enregistre le fichier de ton compte « <b id="dacctname"></b> » : il contient tes données, chiffrées avec ton code. Envoie-le vers Google Drive pour le retrouver sur un autre appareil (écran de connexion → Changer de compte → Importer un compte).</p>
+  <button class="btn primary" id="dsend" type="button">Enregistrer / envoyer vers Drive</button>
+  <button class="btn" id="dlater" type="button">Plus tard</button>
+</div></dialog>
+
 <dialog id="dinfo"><div class="box">
   <h2>Fichier téléchargé</h2>
   <p class="hint">Depuis un fichier local, le navigateur ne peut pas envoyer directement vers Drive. Pour l'y ajouter :</p>
@@ -242,7 +263,8 @@ $('#fav').href=LOGO_URI;
 })();
 
 /* ---------- utilitaires ---------- */
-const LS='passe.vault.v1', ITER=600000, IDLE_MS=5*60*1000, AWAY_MS=60*1000;
+let LS='passe.vault.v1';
+const ITER=600000, IDLE_MS=5*60*1000, AWAY_MS=60*1000;
 const enc=new TextEncoder(), dec=new TextDecoder();
 const b64=buf=>{let s='';const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)};
 const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
@@ -349,7 +371,7 @@ function askPin(title,confirm){
 }
 
 /* ---------- limitation des essais ---------- */
-const LF='passe.fail';
+let LF='passe.fail.principal';
 const getFail=()=>{try{return JSON.parse(localStorage.getItem(LF))||{n:0,until:0}}catch{return{n:0,until:0}}};
 const failWait=()=>Math.max(0,getFail().until-Date.now());
 function noteFail(){const f=getFail();f.n++;if(f.n>=5)f.until=Date.now()+Math.min(30000*2**(f.n-5),3600000);localStorage.setItem(LF,JSON.stringify(f))}
@@ -363,27 +385,78 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden){hiddenAt=Date.now()}
   else if(key&&hiddenAt&&Date.now()-hiddenAt>AWAY_MS){showLock()}
 });
+/* ---------- comptes (pseudo + code) ---------- */
+const LA='passe.accounts', LLAST='passe.last';
+let accts=[], acct=null, justCreated=false;
+const saveAccts=()=>localStorage.setItem(LA,JSON.stringify(accts));
+function loadAccts(){
+  try{accts=JSON.parse(localStorage.getItem(LA))||[]}catch{accts=[]}
+  if(!accts.length&&localStorage.getItem('passe.vault.v1')){accts=[{id:'principal',name:'Principal',k:'passe.vault.v1'}];saveAccts()}
+}
+const acctId=name=>fold(name).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'compte';
+function selectAcct(a){acct=a;LS=a.k;LF='passe.fail.'+a.id;localStorage.setItem(LLAST,a.id)}
 const newMsg=()=>lockMode==='new'
-  ?'Choisis un code à 6 chiffres. Il chiffre tout le contenu et ne peut pas être récupéré s\'il est perdu.'
+  ?'Choisis un code à 6 chiffres pour « '+(acct?acct.name:'')+' ». Il chiffre tout le contenu et ne peut pas être récupéré s\'il est perdu.'
   :'Ancien coffre ouvert. Choisis maintenant ton code à 6 chiffres.';
+function hideLockParts(){
+  ['#picker','#newform','#legacy','#padhost','#acctline'].forEach(s=>{$(s).hidden=true});
+  $('#lockerr').textContent='';$('#nerr').textContent='';$('#mp1').value='';
+}
+function showUnlock(a){
+  selectAcct(a);firstPin='';hideLockParts();
+  $('#acctline').hidden=false;$('#acctname').textContent=a.name;
+  const raw=localStorage.getItem(LS);let p=null;
+  try{p=raw&&JSON.parse(raw)}catch{}
+  if(p&&p.v===1){
+    lockMode='legacy';$('#legacy').hidden=false;
+    $('#lockmsg').textContent='Ce compte utilise encore un mot de passe texte. Saisis-le une dernière fois, puis choisis un code à 6 chiffres.';
+  }else{
+    lockMode='unlock';$('#padhost').hidden=false;$('#lockmsg').textContent='Entre ton code.';
+  }
+  lockPad=pinPad($('#padhost'),onLockPin);
+}
+function showPicker(){
+  hideLockParts();
+  $('#lockmsg').textContent='Choisis un compte.';
+  $('#picker').hidden=false;
+  $('#picker').replaceChildren(
+    ...accts.map(a=>el('button',{class:'btn',type:'button',onclick:()=>showUnlock(a)},a.name)),
+    el('button',{class:'btn primary',type:'button',onclick:showNew},'+ Nouveau compte'),
+    el('button',{class:'btn',type:'button',onclick:()=>$('#afile').click()},'Importer un compte (Excel)'));
+}
+function showNew(){
+  hideLockParts();lockMode='newname';
+  $('#lockmsg').textContent='Nouveau compte : choisis un pseudo, puis un code à 6 chiffres.';
+  $('#newform').hidden=false;$('#ncancel').hidden=!accts.length;$('#npseudo').value='';
+  setTimeout(()=>$('#npseudo').focus(),50);
+}
+$('#ncancel').addEventListener('click',showPicker);
+$('#nimport').addEventListener('click',()=>$('#afile').click());
+$('#acctswitch').addEventListener('click',showPicker);
+$('#newform').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const name=$('#npseudo').value.trim().replace(/\s+/g,' ');
+  if(name.length<2){$('#nerr').textContent='Pseudo trop court';return}
+  const id=acctId(name);
+  if(accts.some(a=>a.id===id)){$('#nerr').textContent='Ce pseudo existe déjà';return}
+  selectAcct({id,name,k:'passe.v.'+id});
+  lockMode='new';firstPin='';hideLockParts();
+  $('#acctline').hidden=false;$('#acctname').textContent=name;
+  $('#padhost').hidden=false;$('#lockmsg').textContent=newMsg();
+  lockPad=pinPad($('#padhost'),onLockPin);
+});
 function showLock(){
   key=null;salt=null;entries=[];curPin='';firstPin='';clearTimeout(idleT);
   document.querySelectorAll('dialog[open]').forEach(d=>d.close());
   $('#grid').replaceChildren();$('#q').value='';
   $('#app').hidden=true;$('#lock').hidden=false;
-  $('#legacy').hidden=true;$('#padhost').hidden=false;$('#lockerr').textContent='';$('#mp1').value='';
-  const raw=localStorage.getItem(LS);let p=null;
-  try{p=raw&&JSON.parse(raw)}catch{}
-  if(!raw){lockMode='new';$('#lockmsg').textContent=newMsg()}
-  else if(p&&p.v===1){
-    lockMode='legacy';$('#padhost').hidden=true;$('#legacy').hidden=false;
-    $('#lockmsg').textContent='Ton coffre utilise encore un mot de passe texte. Saisis-le une dernière fois, puis choisis un code à 6 chiffres.';
-  }
-  else{lockMode='unlock';$('#lockmsg').textContent='Entre ton code.'}
-  lockPad=pinPad($('#padhost'),onLockPin);
+  loadAccts();
+  const last=accts.find(a=>a.id===localStorage.getItem(LLAST))||accts[0];
+  if(last)showUnlock(last);else showNew();
 }
 function enterApp(){
   $('#lock').hidden=true;$('#app').hidden=false;
+  $('#hpseudo').textContent=acct?acct.name:'';
   render();resetIdle();upgradeLogos();
 }
 async function onLockPin(pin){
@@ -397,8 +470,14 @@ async function onLockPin(pin){
     if(!firstPin){firstPin=pin;$('#lockmsg').textContent='Confirme le code.';lockPad.reset();return}
     if(pin!==firstPin){firstPin='';$('#lockmsg').textContent=newMsg();lockPad.reset('Les deux codes ne correspondent pas');return}
     firstPin='';curPin=pin;
-    if(lockMode==='new'){await createVault(pin)}
-    else{salt=crypto.getRandomValues(new Uint8Array(16));curIter=ITER;key=await derive(pin,salt,curIter);await persist()}
+    if(lockMode==='new'){
+      await createVault(pin);
+      if(!accts.some(a=>a.id===acct.id)){accts.push(acct);saveAccts()}
+      enterApp();
+      $('#dacctname').textContent=acct.name;$('#dacct').showModal();
+      return;
+    }
+    salt=crypto.getRandomValues(new Uint8Array(16));curIter=ITER;key=await derive(pin,salt,curIter);await persist();
     enterApp();
   }catch(e){lockPad.reset('Erreur : '+e.message)}
 }
@@ -831,14 +910,14 @@ function sheetXml(rows,widths,hdr){
   const body=rows.map((r,ri)=>'<row r="'+(ri+1)+'">'+r.map((v,ci)=>(v===''||v==null)?'':'<c r="'+colL(ci)+(ri+1)+'" t="inlineStr"'+(hdr&&ri===0?' s="1"':'')+'><is><t xml:space="preserve">'+xesc(v)+'</t></is></c>').join('')+'</row>').join('');
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+cols+'<sheetData>'+body+'</sheetData></worksheet>';
 }
-async function buildXlsx(list,k,saltB64,iter){
+async function buildXlsx(list,k,saltB64,iter,pseudo){
   const rows=[['Nom','Email ou identifiant','Mot de passe (chiffré)','Logo','ID','Modifié','Supprimé']];
   for(const e of list){
     const u=new Date(e.u||e.t||0).toISOString();
     if(e.del)rows.push(['','','','',e.id,u,'1']);
     else rows.push([e.name,e.email,await encCell(k,e.pw),e.logo||'',e.id,u,'']);
   }
-  const info=[['PhonePassword'],['Version','1'],['Sel',saltB64],['Itérations',String(iter)],['Note','Les mots de passe sont chiffrés avec ton code à 6 chiffres. Pour ajouter un compte, ajoute une ligne (Nom, Email, Mot de passe en clair) : elle sera chiffrée à la prochaine synchronisation. Ne modifie pas les colonnes ID et Modifié.']];
+  const info=[['PhonePassword'],['Version','1'],['Pseudo',pseudo||''],['Sel',saltB64],['Itérations',String(iter)],['Note','Les mots de passe sont chiffrés avec ton code à 6 chiffres. Pour ajouter un compte, ajoute une ligne (Nom, Email, Mot de passe en clair) : elle sera chiffrée à la prochaine synchronisation. Ne modifie pas les colonnes ID et Modifié.']];
   const NS='http://schemas.openxmlformats.org/';
   const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
   const files=[
@@ -907,6 +986,7 @@ async function readXlsx(buf,resolveKey){
     if(pw.startsWith('enc:v1:')){try{pw=await decCell(k,pw)}catch{throw new Error('Code incorrect ou fichier modifié')}}
     list.push({id:it.id||uid(),name:it.name,email:it.email,pw,domain:'',logo:it.logo,logoV:it.logo?LOGO_V:undefined,t:it.u||Date.now(),u:it.id?(it.u||0):Date.now()});
   }
+  list.pseudo=info['pseudo']||'';
   return list;
 }
 /*XLSX-END*/
@@ -928,7 +1008,7 @@ async function resolveFileKey(info,sample){
   }
   throw new Error('Code incorrect');
 }
-const buildApp=()=>buildXlsx(entries,key,b64(salt),curIter);
+const buildApp=()=>buildXlsx(entries,key,b64(salt),curIter,acct?acct.name:'');
 const readApp=buf=>readXlsx(buf,resolveFileKey);
 function download(bytes,name){
   const a=el('a',{href:URL.createObjectURL(new Blob([bytes],{type:XLSX_MIME})),download:name});
@@ -949,29 +1029,58 @@ $('#xfile').addEventListener('change',async ev=>{
 });
 
 /* ---------- envoi vers Google Drive (feuille de partage du téléphone) ---------- */
-$('#mshare').addEventListener('click',async()=>{
+async function sendAccountFile(){
   let bytes;
   try{bytes=await buildApp()}catch(e){toast(e.message);return}
   const d=new Date(),p2=n=>String(n).padStart(2,'0');
-  const name='PhonePassword-'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes())+'.xlsx';
+  const name='PhonePassword-'+acctId(acct?acct.name:'compte')+'-'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes())+'.xlsx';
   // 1) fenêtre « Enregistrer sous » (permet de choisir Drive si le navigateur la propose)
   try{
     if(window.showSaveFilePicker){
       const fh=await showSaveFilePicker({suggestedName:name,types:[{description:'Excel',accept:{[XLSX_MIME]:['.xlsx']}}]});
       const w=await fh.createWritable();await w.write(bytes);await w.close();
-      $('#dmenu').close();toast('Fichier enregistré');return;
+      document.querySelectorAll('dialog[open]').forEach(x=>x.close());toast('Fichier enregistré');return;
     }
   }catch(e){if(e&&e.name==='AbortError')return}
   // 2) feuille de partage du téléphone (Drive, Gmail…)
   try{
     const file=new File([bytes],name,{type:XLSX_MIME});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      $('#dmenu').close();await navigator.share({files:[file],title:'PhonePassword'});return;
+      document.querySelectorAll('dialog[open]').forEach(x=>x.close());
+      await navigator.share({files:[file],title:'PhonePassword'});return;
     }
   }catch(e){if(e&&e.name==='AbortError')return}
   // 3) téléchargement + mode d'emploi pour l'ajouter à Drive
   download(bytes,name);
-  $('#dmenu').close();$('#dinfo').showModal();
+  document.querySelectorAll('dialog[open]').forEach(x=>x.close());$('#dinfo').showModal();
+}
+$('#mshare').addEventListener('click',sendAccountFile);
+$('#dsend').addEventListener('click',sendAccountFile);
+$('#dlater').addEventListener('click',()=>$('#dacct').close());
+
+// importer un compte depuis son fichier Excel (écran de connexion)
+$('#afile').addEventListener('change',async ev=>{
+  const f=ev.target.files[0];ev.target.value='';if(!f)return;
+  try{
+    let usedPin='';
+    const list=await readXlsx(await f.arrayBuffer(),async(info,sample)=>{
+      if(!info.salt)throw new Error('Fichier Excel non reconnu');
+      for(let n=0;n<3;n++){
+        const pin=await askPin('Code de ce compte',false);
+        if(!pin)throw new Error('Import annulé');
+        const k=await derive(pin,unb64(info.salt),info.iter);
+        try{await decCell(k,sample);usedPin=pin;return k}catch{toast('Code incorrect')}
+      }
+      throw new Error('Code incorrect');
+    });
+    if(!usedPin)throw new Error('Ce fichier ne contient aucun mot de passe chiffré');
+    const name=(list.pseudo||'Compte importé').trim().slice(0,24)||'Compte importé', id=acctId(name);
+    if(accts.some(a=>a.id===id))throw new Error('Le compte « '+name+' » existe déjà : connecte-toi, puis Menu → Importer un fichier Excel');
+    const a={id,name,k:'passe.v.'+id};
+    selectAcct(a);await createVault(usedPin);
+    entries=list;await persist();
+    accts.push(a);saveAccts();curPin=usedPin;lockMode='unlock';enterApp();
+  }catch(e){toast(e.message)}
 });
 $('#iclose').addEventListener('click',()=>$('#dinfo').close());
 
